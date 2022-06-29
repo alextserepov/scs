@@ -9,17 +9,22 @@ pipeline {
         stage('Score-nixpkgs-NixOS') {
             steps {
 		withCredentials([string(credentialsId: 'GITHUB_AUTH_TOKEN', variable: 'GAT')]) {
-                	sh '/usr/bin/scorecard-linux-amd64 --repo=https://github.com/NixOS/nixpkgs'
-            	}
+                    sh '/usr/bin/scorecard-linux-amd64 --repo=https://github.com/NixOS/nixpkgs'
+		}
+            }
         }
         stage('Score-tiiuae-spectrum') {
             steps {
-                sh '/usr/bin/scorecard-linux-amd64 --repo=https://github.com/tiiuae/spectrum'
+		withCredentials([string(credentialsId: 'GITHUB_AUTH_TOKEN', variable: 'GAT')]) {
+                    sh '/usr/bin/scorecard-linux-amd64 --repo=https://github.com/tiiuae/spectrum'
+                }
             }
         }
         stage('Score-tiiuae-nixpkgs-spectrum') {
             steps {
-                sh '/usr/bin/scorecard-linux-amd64 --repo=https://github.com/tiiuae/nixpkgs-spectrum'
+		withCredentials([string(credentialsId: 'GITHUB_AUTH_TOKEN', variable: 'GAT')]) {
+                    sh '/usr/bin/scorecard-linux-amd64 --repo=https://github.com/tiiuae/nixpkgs-spectrum'
+                }
             }
         }
         stage('Clone-em-all') {
