@@ -1,8 +1,10 @@
 pipeline {
     agent any
-//    environment {
-//        GITHUB_AUTH_TOKEN = ''
-//        }
+    environment {
+	withCredentials([string(credentialsId: 'GITHUB_AUTH_TOKEN', variable: 'GAT')]) {
+        	GITHUB_AUTH_TOKEN = GAT
+        	}
+    }
     stages {
         stage('Score-nixpkgs-NixOS') {
             steps {
