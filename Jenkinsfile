@@ -1,8 +1,8 @@
 pipeline {
     agent any
-    environment {
-        GITHUB_AUTH_TOKEN = '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'
-        }
+//    environment {
+//        GITHUB_AUTH_TOKEN = ''
+//        }
     stages {
         stage('Score-nixpkgs-NixOS') {
             steps {
