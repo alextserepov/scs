@@ -8,21 +8,21 @@ pipeline {
     stages {
         stage('Score-nixpkgs-NixOS') {
             steps {
-		withCredentials([string(credentialsId: 'GAT', variable: 'GAT')]) {
+		withCredentials([string(credentialsId: 'GAT', variable: 'GITHUB_AUTH_TOKEN')]) {
                     sh '/usr/bin/scorecard-linux-amd64 --repo=https://github.com/NixOS/nixpkgs'
 		}
             }
         }
         stage('Score-tiiuae-spectrum') {
             steps {
-		withCredentials([string(credentialsId: 'GAT', variable: 'GAT')]) {
+		withCredentials([string(credentialsId: 'GAT', variable: 'GITHUB_AUTH_TOKEN')]) {
                     sh '/usr/bin/scorecard-linux-amd64 --repo=https://github.com/tiiuae/spectrum'
                 }
             }
         }
         stage('Score-tiiuae-nixpkgs-spectrum') {
             steps {
-		withCredentials([string(credentialsId: 'GAT', variable: 'GAT')]) {
+		withCredentials([string(credentialsId: 'GAT', variable: 'GITHUB_AUTH_TOKEN')]) {
                     sh '/usr/bin/scorecard-linux-amd64 --repo=https://github.com/tiiuae/nixpkgs-spectrum'
                 }
             }
