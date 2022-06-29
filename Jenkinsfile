@@ -1,15 +1,16 @@
 pipeline {
     agent any
-    environment {
+/*    environment {
 	withCredentials([string(credentialsId: 'GITHUB_AUTH_TOKEN', variable: 'GAT')]) {
         	GITHUB_AUTH_TOKEN = GAT
         	}
-    }
+    }*/
     stages {
         stage('Score-nixpkgs-NixOS') {
             steps {
-                sh '/usr/bin/scorecard-linux-amd64 --repo=https://github.com/NixOS/nixpkgs'
-            }
+		withCredentials([string(credentialsId: 'GITHUB_AUTH_TOKEN', variable: 'GAT')]) {
+                	sh '/usr/bin/scorecard-linux-amd64 --repo=https://github.com/NixOS/nixpkgs'
+            	}
         }
         stage('Score-tiiuae-spectrum') {
             steps {
