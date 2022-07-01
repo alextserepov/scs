@@ -4,6 +4,13 @@ pipeline {
         GITHUB_AUTH_TOKEN = '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'
         }*/
     stages {
+        stage('Clone') {
+            steps {
+                sh 'git clone https://github.com/NixOS/nixpkgs.git'
+                sh 'git clone https://github.com/tiiuae/nixpkgs-spectrum.git'
+                sh 'git clone https://github.com/tiiuae/spectrum.git'
+            }
+        }
         stage('Get-depcheck') {
             steps {
                 sh 'wget https://github.com/jeremylong/DependencyCheck/releases/download/v7.1.1/dependency-check-7.1.1-release.zip'
