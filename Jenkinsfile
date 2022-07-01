@@ -1,45 +1,45 @@
 pipeline {
     agent any
 /*    environment {
-	withCredentials([string(credentialsId: 'GITHUB_AUTH_TOKEN', variable: 'GAT')]) {
-        	GITHUB_AUTH_TOKEN = GAT
-        	}
-    }*/
+        GITHUB_AUTH_TOKEN = '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'
+        }*/
     stages {
-        stage('Score-nixpkgs-NixOS') {
+        stage('Get-depcheck') {
             steps {
-		withCredentials([string(credentialsId: 'GAT', variable: 'GITHUB_AUTH_TOKEN')]) {
-                    sh '/usr/bin/scorecard-linux-amd64 --repo=https://github.com/NixOS/nixpkgs'
-		}
+                sh 'wget https://github.com/jeremylong/DependencyCheck/releases/download/v7.1.1/dependency-check-7.1.1-release.zip'
+                sh 'unzip -n dependency-check-7.1.1-release.zip'
             }
         }
-        stage('Score-tiiuae-spectrum') {
+        stage ('prep-env') {
             steps {
-		withCredentials([string(credentialsId: 'GAT', variable: 'GITHUB_AUTH_TOKEN')]) {
-                    sh '/usr/bin/scorecard-linux-amd64 --repo=https://github.com/tiiuae/spectrum'
-                }
-            }
-        }
-        stage('Score-tiiuae-nixpkgs-spectrum') {
-            steps {
-		withCredentials([string(credentialsId: 'GAT', variable: 'GITHUB_AUTH_TOKEN')]) {
-                    sh '/usr/bin/scorecard-linux-amd64 --repo=https://github.com/tiiuae/nixpkgs-spectrum'
-                }
-            }
-        }
-        stage('Clone-em-all') {
-            steps {
-                sh 'git clone https://github.com/NixOS/nixpkgs'
-                sh 'git clone https://github.com/tiiuae/spectrum'
-                sh 'git clone https://github.com/tiiuae/nixpkgs-spectrum'
+                sh 'mkdir -p reports/nixpkgs'
+                sh 'mkdir -p reports/spectrum'
+                sh 'mkdir -p reports/nixpkgs-spectrum'
             }
         }
         stage('Dep-Check') {
-            steps {
-                sh '/usr/bin/dependency-check.sh --project "NixPkgs" --scan "nixpkgs/"'
-                sh '/usr/bin/dependency-check.sh --project "Spectrum" --scan "spectrum/"'
-                sh '/usr/bin/dependency-check.sh --project "NixPkgs-Spectrum" --scan "nixpkgs-spectrum"'
+            parallel {
+                stage('Dep-Check-nixpkgs') {
+                    steps {
+                        sh 'dependency-check/bin/dependency-check.sh --project "NixPkgs" --scan "nixpkgs/" --out ./reports/nixpkgs'
+                    }
+                }
+                stage('Dep-Check-Spectrum') {
+                    steps {
+                        sh 'dependency-check/bin/dependency-check.sh --project "Spectrum" --scan "spectrum/" --out ./reports/spectrum'
+                    }
+                }
+                stage('Dep-Check-nixpkgs-spectrum') {
+                    steps {
+                        sh 'dependency-check/bin/dependency-check.sh --project "NixPkgs-Spectrum" --scan "nixpkgs-spectrum" --out ./reports/nixpkgs-spectrum'
+                    }
+                }
             }
+        }
+    }
+    post {
+        always {
+            archiveArtifacts artifacts: './reports/*'
         }
     }
 }
