@@ -1,5 +1,15 @@
 #!/usr/bin/env python3
 
+## find your curve
+# openssl ecparam -list_curves
+#
+## generate a private key for a curve
+# openssl ecparam -name prime256v1 -genkey -noout -out private-key.pem
+#
+## generate corresponding public key
+# openssl ec -in private-key.pem -pubout -out public-key.pem
+##
+
 import sys
 
 from base64 import (
@@ -8,6 +18,11 @@ from base64 import (
         )
 
 from Crypto.Hash import SHA256
+from Crypto.PublicKey import ECC
+from Crypto.Signature import DSS
+
+
+
 from Crypto.Signature import PKCS1_v1_5
 from Crypto.PublicKey import RSA
 
@@ -41,20 +56,63 @@ class provSigner():
         print(verified)
         return verified
 
+class provSignerECC():
+    def provSign(this, fileName, keyFile):
+        print ("fileName: "+fileName)
+        print ("keyFile: "+keyFile)
+        key = ECC.import_key(open(keyFile).read())
+        digest = SHA256.new(open(fileName).read().encode('utf-8'))
+        signer = DSS.new(key, 'fips-186-3')
+        this.sig = signer.sign(digest)
+        return (digest, this.sig)
 
-t=provSigner()
-if (len(sys.argv)<=4 and len(sys.argv)>2):
+    def saveSignature(this, filename):
+        f = open (filename, "wb")
+        f.write(this.sig)
+        f.close()
+
+    def provVerify(this, fileName, sigFile, keyFile):
+        print ("fileName: "+fileName)
+        print ("sigFile: "+sigFile)
+        print ("keyFile: "+keyFile)
+        key = ECC.import_key(open(keyFile).read())
+        digest = SHA256.new(open(fileName).read().encode('utf-8'))
+        verifier = DSS.new(key, 'fips-186-3')
+        try:
+            verifier.verify(digest, open(sigFile, "rb").read())
+            print ("True")
+            return True
+        except ValueError:
+            print ("False")
+            return False
+
+t=provSignerECC()
+
+if (len(sys.argv)<=5 and len(sys.argv)>2):
     if (sys.argv[1]=='sig'):
-       (dig, sig) = t.provSign(sys.argv[2])
-       t.saveSignature("signature")
+        (dig, sig) = t.provSign(sys.argv[2], sys.argv[3])
+        t.saveSignature("signature")
     elif (sys.argv[1]=='ver'):
-        digest = SHA256.new()
-        with open(sys.argv[2], "r") as provfile:
-            digest.update(provfile.read().encode('utf-8'))
-        with open(sys.argv[3], "rb") as sigfile:
-            t.provVerify(digest, sigfile.read())
+        t.provVerify(sys.argv[2], sys.argv[3], sys.argv[4])
 else:
     print("Usage:")
-    print("sing.py sig fname")
-    print("sing.py ver fname signature")
+    print("sing.py sig fname keyfile")
+    print("sing.py ver fname signature keyfile")
+
+
+#t=provSigner()
+#if (len(sys.argv)<=4 and len(sys.argv)>2):
+#    if (sys.argv[1]=='sig'):
+#       (dig, sig) = t.provSign(sys.argv[2])
+#       t.saveSignature("signature")
+#    elif (sys.argv[1]=='ver'):
+#        digest = SHA256.new()
+#        with open(sys.argv[2], "r") as provfile:
+#            digest.update(provfile.read().encode('utf-8'))
+#        with open(sys.argv[3], "rb") as sigfile:
+#            t.provVerify(digest, sigfile.read())
+#else:
+#    print("Usage:")
+#    print("sing.py sig fname")
+#    print("sing.py ver fname signature")
 
