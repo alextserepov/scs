@@ -21,6 +21,9 @@ class provSigner():
         with open ("private.pem", "r") as myfile:
             private_key = RSA.importKey(myfile.read())
 
+# This needs to be updated to proper PKCS version. (e.g. 11?)
+# For now just using PKCS1_v1_5 as nothing else is supported by Pycryptodome.
+
         signer = PKCS1_v1_5.new(private_key)
         this.sig = signer.sign(digest)
         return (digest, this.sig)
