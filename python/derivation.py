@@ -13,5 +13,5 @@ for i in data:
         app = re.sub('-[0-9].*', '', post)
         ver = re.sub('.*-', '', post)
         if (len(app)>0 and len(ver)>0):
-            print('{"app": "'+app+'", "version": "' + ver + '"}')
+            print('{"app": "'+app+'", "version": "' + ver + '", "nix": "'+i+'"}')
 f.close()
