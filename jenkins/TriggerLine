@@ -32,7 +32,12 @@ pipeline {
                     def storepaths = readFile(file: 'list.txt')
                     storepaths.split('\n').each { String line ->
                         println("hash: ${line}")
-                        build job: 'NixCopyTest', parameters: [[$class: 'StringParameterValue', name: 'image', value: "${line}"]]
+                        try {
+                            build job: 'NixCopyTest', parameters: [[$class: 'StringParameterValue', name: 'image', value: "${line}"]]
+                            echo "${line}" >> list2.txt
+                        } catch (err) {
+                            println("Hash: ${line} failed: ${err}")
+                        }
 
                     }
                 }
