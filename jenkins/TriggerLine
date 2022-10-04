@@ -31,12 +31,11 @@ pipeline {
             steps {
                 script {
                     def storepaths = readFile(file: 'list.txt')
-                    def workList = new File("wlist.txt")
                     storepaths.split('\n').each { String line ->
                         println("hash: ${line}")
                         try {
                             build job: 'NixCopyTest', parameters: [[$class: 'StringParameterValue', name: 'image', value: "${line}"]]
-                            workList.append "${line}\n"
+                            sh 'echo "${line}" >> wlist.txt'
                         } catch (err) {
                             println("Hash: ${line} failed: ${err}")
                         }
