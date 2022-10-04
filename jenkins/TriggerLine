@@ -4,7 +4,9 @@ pipeline {
     stages {
       /*  stage('clone') {
             steps {
-                sh 'git clone https://github.com/tiiuae/spectrum-jenkins.git'
+                catchError {
+                    sh 'git clone https://github.com/tiiuae/spectrum-jenkins.git'
+                }
             }
         }*/
         stage('debug') {
