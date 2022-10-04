@@ -1,0 +1,54 @@
+pipeline {
+    //agent {label 'NotInUse'}
+    agent {label 'tc-agent02'}
+    stages {
+      /*  stage('clone') {
+            steps {
+                sh 'git clone https://github.com/tiiuae/spectrum-jenkins.git'
+            }
+        }*/
+        stage('debug') {
+            steps {
+                sh 'rm -rf hydra.*'
+                sh 'rm -rf list.txt'
+            }
+        }
+      /*  stage('verifyStore') {
+            steps {
+                build job: 'NixStoreChecker'
+            }
+        }*/
+        stage('hydrascrape') {
+            steps {
+                sh 'echo abc'
+                sh 'python3  spectrum-jenkins/hydrascrape/hydrascrape.py hydra.vedenemo.dev nuctest combined \'echo $HYDRA_OUTPUT_STORE_PATHS >> list.txt\''
+            }
+        }
+        stage('copy') {
+            steps {
+                script {
+                    def storepaths = readFile(file: 'list.txt')
+                    storepaths.split('\n').each { String line ->
+                        println("hash: ${line}")
+                        build job: 'NixCopyTest', parameters: [[$class: 'StringParameterValue', name: 'image', value: "${line}"]]
+
+                    }
+                }
+            }
+        }
+        stage('vulnix') {
+            steps {
+                script {
+                    def storepaths = readFile(file: 'list.txt')
+                    storepaths.split('\n').each{ String line ->
+                    println ("Vulnix for hash: ${line}")
+                    catchError {
+                        build job: 'vulnix', parameters: [[$class: 'StringParameterValue', name: 'image', value: "${line}"]]                    
+                    }
+                    }
+                }
+            }
+        }
+        
+    }
+}
